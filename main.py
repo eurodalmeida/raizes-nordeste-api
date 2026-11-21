@@ -5,7 +5,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from fastapi import FastAPI
 from app.api.error_handler import registrar_error_handlers
-from app.api.routers import auth, catalogo
+from app.api.routers import auditoria, auth, catalogo, pedidos
 from app.infrastructure.database import Base, engine
 from app.infrastructure import models  # noqa: F401
 
@@ -20,6 +20,8 @@ app = FastAPI(
 registrar_error_handlers(app)
 app.include_router(auth.router)
 app.include_router(catalogo.router)
+app.include_router(pedidos.router)
+app.include_router(auditoria.router)
 
 
 @app.get("/health", tags=["Sistema"])
