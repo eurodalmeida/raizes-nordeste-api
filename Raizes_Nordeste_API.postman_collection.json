@@ -1,0 +1,141 @@
+﻿{
+  "info": {
+    "name": "Raizes do Nordeste - API Omnichannel",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://127.0.0.1:8000" },
+    { "key": "token_cliente", "value": "" },
+    { "key": "token_gerente", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "T01 - Health Check (Positivo)",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/health"
+      }
+    },
+    {
+      "name": "T02 - Cadastro sem consentimento LGPD 409 (Negativo)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nome\": \"Teste LGPD\",\n  \"email\": \"sem_lgpd@teste.com\",\n  \"senha\": \"123456\",\n  \"consentimento_lgpd\": false\n}"
+        },
+        "url": "{{base_url}}/auth/registro"
+      }
+    },
+    {
+      "name": "T03 - Cadastro valido com LGPD 201 (Positivo)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nome\": \"Novo Cliente\",\n  \"email\": \"novo@teste.com\",\n  \"senha\": \"123456\",\n  \"consentimento_lgpd\": true\n}"
+        },
+        "url": "{{base_url}}/auth/registro"
+      }
+    },
+    {
+      "name": "T04 - Login Cliente valido 200 (Positivo)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/x-www-form-urlencoded" }],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            { "key": "username", "value": "cliente@raizes.com" },
+            { "key": "password", "value": "123456" }
+          ]
+        },
+        "url": "{{base_url}}/auth/login"
+      }
+    },
+    {
+      "name": "T05 - Listar pedidos sem token 401 (Negativo)",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/pedidos"
+      }
+    },
+    {
+      "name": "T06 - Consultar catalogo e estoque da unidade 200 (Positivo)",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/catalogo/produtos"
+      }
+    },
+    {
+      "name": "T07 - Criar pedido omnichannel valido 201 (Positivo)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token_cliente}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"unidade_id\": 1,\n  \"canal_pedido\": \"APP\",\n  \"itens\": [{ \"produto_id\": 1, \"quantidade\": 1 }]\n}"
+        },
+        "url": "{{base_url}}/pedidos"
+      }
+    },
+    {
+      "name": "T08 - Criar pedido com estoque insuficiente 409 (Negativo)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token_cliente}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"unidade_id\": 1,\n  \"canal_pedido\": \"TOTEM\",\n  \"itens\": [{ \"produto_id\": 1, \"quantidade\": 9999 }]\n}"
+        },
+        "url": "{{base_url}}/pedidos"
+      }
+    },
+    {
+      "name": "T09 - Processar pagamento mock aprovado 200 (Positivo)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token_cliente}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"aprovar\": true,\n  \"usar_pontos_fidelidade\": 0\n}"
+        },
+        "url": "{{base_url}}/pedidos/1/pagar"
+      }
+    },
+    {
+      "name": "T10 - Acessar logs de auditoria como Cliente 403 (Negativo)",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token_cliente}}" }],
+        "url": "{{base_url}}/auditoria/logs"
+      }
+    },
+    {
+      "name": "T11 - Processar pagamento mock recusado (Negativo)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token_cliente}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"aprovar\": false,\n  \"usar_pontos_fidelidade\": 0\n}"
+        },
+        "url": "{{base_url}}/pedidos/1/pagar"
+      }
+    }
+  ]
+}
